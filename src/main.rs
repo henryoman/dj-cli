@@ -1,14 +1,34 @@
-use crate::app::App;
+use color_eyre::Result;
+use tracing::{info, error};
+use tracing_subscriber;
 
 pub mod app;
-pub mod event;
 pub mod ui;
 
+use app::App;
+
 #[tokio::main]
-async fn main() -> color_eyre::Result<()> {
+async fn main() -> Result<()> {
+    // Initialize error handling
     color_eyre::install()?;
+    
+    // Initialize logging (2025 best practice)
+    tracing_subscriber::fmt::init();
+    
+    info!("Starting DJ CLI");
+    
+    // Initialize terminal
     let terminal = ratatui::init();
-    let result = App::new().run(terminal).await;
+    
+    // Run the app
+    let app_result = App::new().run(terminal).await;
+    
+    // Restore terminal
     ratatui::restore();
-    result
+    
+    if let Err(e) = &app_result {
+        error!("Application error: {}", e);
+    }
+    
+    app_result
 }

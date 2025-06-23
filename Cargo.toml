@@ -1,7 +1,7 @@
 [package]
 name = "dj-cli"
 version = "0.1.0"
-description = "built with rust and ratatui"
+description = "A CLI tool for DJs to download MP3s from YouTube"
 authors = ["Henryoman <henryoman@mac.com>"]
 license = "MIT"
 edition = "2024"
@@ -12,6 +12,11 @@ futures = "0.3.31"
 ratatui = "0.29.0"
 tokio = { version = "1.40.0", features = ["full"] }
 color-eyre = "0.6.3"
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+yt-dlp = "1.3.4"
+
+[dev-dependencies]
 cargo-watch = "8.5.3"
 rat-text = "1.0.5"
 which = "8.0.0"
