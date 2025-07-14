@@ -4,7 +4,7 @@
   <img src="logo.png" alt="dj-cli logo" width="400"/>
 </p>
 
-<h2 align="center">Your friendly terminal companion for downloading MP3s from YouTube</h2>
+<h2 align="center">TUI for downloading mp3's from various sources</h2>
 
 <p align="center">
   <a href="https://crates.io/crates/dj-cli">
