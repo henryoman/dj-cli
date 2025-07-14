@@ -20,6 +20,20 @@ pub struct App {
     pub download_status: DownloadStatus,
     /// Focus state (Input or Convert button)
     pub focus: Focus,
+    /// Batch mode enabled
+    pub batch_mode: bool,
+    /// List of URLs for batch download
+    pub batch_urls: Vec<String>,
+    /// Current batch download progress
+    pub batch_progress: BatchProgress,
+}
+
+#[derive(Debug, Clone)]
+pub struct BatchProgress {
+    pub current: usize,
+    pub total: usize,
+    pub completed: Vec<String>,
+    pub failed: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -51,6 +65,14 @@ impl App {
             status_message: "Paste a YouTube URL and press Convert to download MP3".to_string(),
             download_status: DownloadStatus::Idle,
             focus: Focus::Input,
+            batch_mode: false,
+            batch_urls: Vec::new(),
+            batch_progress: BatchProgress {
+                current: 0,
+                total: 0,
+                completed: Vec::new(),
+                failed: Vec::new(),
+            },
         }
     }
 
@@ -93,6 +115,32 @@ impl App {
                 info!("User quit with Escape");
                 self.running = false;
             }
+            KeyCode::Char('b') | KeyCode::Char('B') => {
+                if key.modifiers.contains(KeyModifiers::CONTROL) {
+                    // Toggle batch mode with Ctrl+B
+                    self.batch_mode = !self.batch_mode;
+                    if self.batch_mode {
+                        self.status_message = "🎯 Batch mode ON - Add URLs with Enter, download with Ctrl+D".to_string();
+                        self.batch_urls.clear();
+                        self.batch_progress = BatchProgress {
+                            current: 0,
+                            total: 0,
+                            completed: Vec::new(),
+                            failed: Vec::new(),
+                        };
+                    } else {
+                        self.status_message = "Single URL mode - Paste a YouTube URL and press Enter to download".to_string();
+                        self.batch_urls.clear();
+                    }
+                    info!("Batch mode toggled: {}", self.batch_mode);
+                }
+            }
+            KeyCode::Char('d') | KeyCode::Char('D') => {
+                if key.modifiers.contains(KeyModifiers::CONTROL) && self.batch_mode {
+                    // Start batch download with Ctrl+D
+                    self.start_batch_download(128).await?;
+                }
+            }
             KeyCode::Tab => {
                 // Switch focus between input and buttons
                 self.focus = match self.focus {
@@ -102,22 +150,37 @@ impl App {
                 };
             }
             KeyCode::Enter => {
-                match self.focus {
-                    Focus::Download256 => {
-                        self.start_download(256).await?;
+                if self.batch_mode {
+                    // In batch mode, Enter adds URL to batch list
+                    let url = self.input.trim().to_string();
+                    if !url.is_empty() {
+                        if url.contains("youtube.com") || url.contains("youtu.be") {
+                            self.batch_urls.push(url.clone());
+                            self.status_message = format!("✅ Added to batch: {} (Total: {})", url, self.batch_urls.len());
+                            self.input.clear();
+                        } else {
+                            self.status_message = "❌ Please enter a valid YouTube URL".to_string();
+                        }
                     }
-                    Focus::Download128 => {
-                        self.start_download(128).await?;
-                    }
-                    Focus::Input => {
-                        // Enter in input field triggers 256kbps download by default
-                        self.start_download(256).await?;
+                } else {
+                    // Single URL mode - normal behavior
+                    match self.focus {
+                        Focus::Download256 => {
+                            self.start_download(256).await?;
+                        }
+                        Focus::Download128 => {
+                            self.start_download(128).await?;
+                        }
+                        Focus::Input => {
+                            // Enter in input field triggers 128kbps download by default
+                            self.start_download(128).await?;
+                        }
                     }
                 }
             }
             _ => {
-                // Only handle input if focused on input field
-                if self.focus == Focus::Input {
+                // Handle text input for the URL field (always active in batch mode, or when input is focused)
+                if self.batch_mode || self.focus == Focus::Input {
                     // Handle text input for the URL field
                     match key.code {
                         KeyCode::Char(c) => {
@@ -177,6 +240,64 @@ impl App {
                 self.download_status = DownloadStatus::Error(e.to_string());
                 self.status_message = format!("❌ Error: {}", e);
             }
+        }
+
+        Ok(())
+    }
+
+    /// Start batch downloading multiple YouTube videos as MP3
+    async fn start_batch_download(&mut self, bitrate: u32) -> Result<()> {
+        if self.batch_urls.is_empty() {
+            self.status_message = "❌ No URLs in batch. Add URLs with Enter first.".to_string();
+            return Ok(());
+        }
+
+        info!("Starting batch download for {} URLs at {}kbps", self.batch_urls.len(), bitrate);
+        self.download_status = DownloadStatus::Downloading;
+        self.batch_progress = BatchProgress {
+            current: 0,
+            total: self.batch_urls.len(),
+            completed: Vec::new(),
+            failed: Vec::new(),
+        };
+
+        // Create output directory in user's Downloads folder
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let output_dir = PathBuf::from(home).join("Downloads").join("dj-cli");
+        
+        // Create directories if they don't exist
+        tokio::fs::create_dir_all(&output_dir).await?;
+        
+        let libs_dir = output_dir.join("libs");
+        tokio::fs::create_dir_all(&libs_dir).await?;
+
+        // Download each URL in the batch
+        for (index, url) in self.batch_urls.iter().enumerate() {
+            self.batch_progress.current = index + 1;
+            self.status_message = format!("📥 Downloading {}/{}: {}", index + 1, self.batch_urls.len(), url);
+
+            match self.download_mp3(url.clone(), libs_dir.clone(), output_dir.clone(), bitrate).await {
+                Ok(file_path) => {
+                    info!("Successfully downloaded: {}", file_path);
+                    self.batch_progress.completed.push(url.clone());
+                }
+                Err(e) => {
+                    error!("Download failed for {}: {}", url, e);
+                    self.batch_progress.failed.push(url.clone());
+                }
+            }
+        }
+
+        // Final status message
+        let success_count = self.batch_progress.completed.len();
+        let failed_count = self.batch_progress.failed.len();
+        
+        if failed_count == 0 {
+            self.status_message = format!("✅ Batch complete! All {} downloads successful", success_count);
+            self.download_status = DownloadStatus::Success(format!("{} files downloaded", success_count));
+        } else {
+            self.status_message = format!("⚠️ Batch complete: {} successful, {} failed", success_count, failed_count);
+            self.download_status = DownloadStatus::Success(format!("{} successful, {} failed", success_count, failed_count));
         }
 
         Ok(())
