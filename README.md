@@ -1,5 +1,3 @@
-# dj-cli
-
 <p align="center">
   <img src="logo.png" alt="dj-cli logo" width="400"/>
 </p>
