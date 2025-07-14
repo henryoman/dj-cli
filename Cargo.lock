@@ -564,6 +564,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
 
 [[package]]
+name = "convert_case"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb402b8d4c85569410425650ce3eddc7d698ed96d39a73f941b08fb63082f1e7"
+dependencies = [
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -626,10 +635,28 @@ checksum = "829d955a0bb380ef178a640b91779e3987da38c9aea133b20614cfed8cdea9c6"
 dependencies = [
  "bitflags 2.9.1",
  "crossterm_winapi",
- "futures-core",
  "mio 1.0.4",
  "parking_lot",
  "rustix 0.38.44",
+ "signal-hook",
+ "signal-hook-mio",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "crossterm"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8b9f2e4c67f833b660cdb0a3523065869fb35570177239812ed4c905aeff87b"
+dependencies = [
+ "bitflags 2.9.1",
+ "crossterm_winapi",
+ "derive_more 2.0.1",
+ "document-features",
+ "futures-core",
+ "mio 1.0.4",
+ "parking_lot",
+ "rustix 1.0.7",
  "signal-hook",
  "signal-hook-mio",
  "winapi 0.3.9",
@@ -787,7 +814,16 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a9b99b9cbbe49445b21764dc0625032a89b145a2642e67603e1c936f5458d05"
 dependencies = [
- "derive_more-impl",
+ "derive_more-impl 1.0.0",
+]
+
+[[package]]
+name = "derive_more"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "093242cf7570c207c83073cf82f79706fe7b8317e98620a47d5be7c3d8497678"
+dependencies = [
+ "derive_more-impl 2.0.1",
 ]
 
 [[package]]
@@ -796,6 +832,18 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
 dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.104",
+]
+
+[[package]]
+name = "derive_more-impl"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bda628edc44c4bb645fbe0f758797143e4e07926f7ebf4e9bdfbd3d2ce621df3"
+dependencies = [
+ "convert_case",
  "proc-macro2",
  "quote",
  "syn 2.0.104",
@@ -859,7 +907,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-watch",
  "color-eyre",
- "crossterm",
+ "crossterm 0.29.0",
  "futures",
  "rat-text",
  "ratatui",
@@ -868,6 +916,15 @@ dependencies = [
  "tracing-subscriber",
  "which 8.0.0",
  "yt-dlp",
+]
+
+[[package]]
+name = "document-features"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95249b50c6c185bee49034bcb378a49dc2b5dff0be90ff6616d31d64febab05d"
+dependencies = [
+ "litrs",
 ]
 
 [[package]]
@@ -1841,6 +1898,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "241eaef5fd12c88705a01fc1066c48c4b36e0dd4377dcdc7ec3942cea7a69956"
 
 [[package]]
+name = "litrs"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4ce301924b7887e9d637144fdade93f9dfff9b60981d4ac161db09720d39aa5"
+
+[[package]]
 name = "lock_api"
 version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2488,7 +2551,7 @@ version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26e333b72bcd23f28ac85ba6441c5e75600ace55947e71930e7cb327e6716286"
 dependencies = [
- "crossterm",
+ "crossterm 0.28.1",
  "log",
  "ratatui",
 ]
@@ -2499,7 +2562,7 @@ version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b4866c2abcc7b8c8744548b4849c67b654d2dd28ee118fcc9b65979c96247cb"
 dependencies = [
- "crossterm",
+ "crossterm 0.28.1",
  "fxhash",
  "log",
  "rat-event",
@@ -2523,7 +2586,7 @@ version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bef575500e9a54d649a470abf1ec136929845bfced1badb5fda4994c6ce39f9"
 dependencies = [
- "crossterm",
+ "crossterm 0.28.1",
  "log",
  "rat-event",
  "rat-reloc",
@@ -2537,7 +2600,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95641a2429aeb420a2c37d7a8c0395cf28ce4ac4f32d914813196ca22a7a3004"
 dependencies = [
  "chrono",
- "crossterm",
+ "crossterm 0.28.1",
  "dyn-clone",
  "format_num_pattern",
  "iset",
@@ -2563,7 +2626,7 @@ dependencies = [
  "bitflags 2.9.1",
  "cassowary",
  "compact_str",
- "crossterm",
+ "crossterm 0.28.1",
  "indoc",
  "instability",
  "itertools",
@@ -4192,7 +4255,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0b66a9854887b7692cc5832b4666eec44f2753abff966e87e56cda65d64671c"
 dependencies = [
  "chrono",
- "derive_more",
+ "derive_more 1.0.0",
  "flate2",
  "futures-util",
  "id3",
