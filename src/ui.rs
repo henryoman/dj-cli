@@ -78,12 +78,14 @@ pub fn render(frame: &mut Frame, app: &App) {
         .block(input_block);
     frame.render_widget(input_widget, chunks[2]);
 
-    // Download buttons area - split horizontally
+    // Download buttons area - split horizontally with narrower buttons
     let button_chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(50), // 256kbps button
-            Constraint::Percentage(50), // 128kbps button
+            Constraint::Length(25), // 256kbps button (fixed width)
+            Constraint::Length(5),  // Spacing
+            Constraint::Length(25), // 128kbps button (fixed width)
+            Constraint::Min(0),     // Remaining space
         ])
         .split(chunks[4]);
 
@@ -145,7 +147,7 @@ pub fn render(frame: &mut Frame, app: &App) {
                     Style::default().fg(Color::Gray)
                 }),
         );
-    frame.render_widget(download_128_button, button_chunks[1]);
+    frame.render_widget(download_128_button, button_chunks[2]);
 
 
 
