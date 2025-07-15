@@ -24,8 +24,8 @@ pub fn render(frame: &mut Frame, app: &App) {
             Constraint::Length(3), // Download buttons
             Constraint::Length(1), // Spacing  
             Constraint::Length(3), // Status
-            Constraint::Length(if app.batch_mode { 8 } else { 0 }), // Batch URLs list (only in batch mode)
-            Constraint::Length(6), // Instructions
+            Constraint::Length(if app.batch_mode { 6 } else { 0 }), // Batch URLs list (only in batch mode)
+            Constraint::Length(4), // Instructions
             Constraint::Min(0),    // Remaining space
         ])
         .split(area);
@@ -66,7 +66,7 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     let input_block = Block::default()
         .borders(Borders::ALL)
-        .title(if app.batch_mode { "YouTube URL (Batch Mode)" } else { "YouTube URL" })
+        .title(if app.batch_mode { "YouTube URL" } else { "YouTube URL" })
         .border_style(if app.batch_mode || app.is_input_focused() {
             Style::default().fg(Color::Yellow)
         } else {
@@ -82,9 +82,9 @@ pub fn render(frame: &mut Frame, app: &App) {
     let button_chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Length(25), // 256kbps button (fixed width)
-            Constraint::Length(5),  // Spacing
-            Constraint::Length(25), // 128kbps button (fixed width)
+            Constraint::Length(15), // 256kbps button (fixed width)
+            Constraint::Length(3),  // Spacing
+            Constraint::Length(15), // 128kbps button (fixed width)
             Constraint::Min(0),     // Remaining space
         ])
         .split(chunks[4]);
@@ -103,7 +103,7 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     let button_256_text = match app.download_status {
         DownloadStatus::Downloading => "⏳ Downloading...",
-        _ => "🎵 Download at 256kbps",
+        _ => "🎵 256kbps",
     };
 
     let download_256_button = Paragraph::new(button_256_text)
@@ -133,7 +133,7 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     let button_128_text = match app.download_status {
         DownloadStatus::Downloading => "⏳ Downloading...",
-        _ => "🎵 Download at 128kbps",
+        _ => "🎵 128kbps",
     };
 
     let download_128_button = Paragraph::new(button_128_text)
@@ -168,16 +168,16 @@ pub fn render(frame: &mut Frame, app: &App) {
     if app.batch_mode && chunks.len() > 7 {
         let batch_text: Vec<Line> = if app.batch_urls.is_empty() {
             vec![Line::from(vec![
-                Span::styled("No URLs added yet. Press Enter to add URLs to batch.", Style::default().fg(Color::Gray))
+                Span::styled("No URLs added yet. Press Enter to add.", Style::default().fg(Color::Gray))
             ])]
         } else {
             let mut lines = vec![Line::from(vec![
-                Span::styled(format!("Batch URLs ({}):", app.batch_urls.len()), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+                Span::styled(format!("Queue ({}):", app.batch_urls.len()), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
             ])];
             
             for (i, url) in app.batch_urls.iter().enumerate() {
-                let display_url = if url.len() > 50 {
-                    format!("{}...", &url[..47])
+                let display_url = if url.len() > 30 {
+                    format!("{}...", &url[..27])
                 } else {
                     url.clone()
                 };
@@ -201,63 +201,37 @@ pub fn render(frame: &mut Frame, app: &App) {
     let instructions_text = if app.batch_mode {
         vec![
             Line::from(vec![
-                Span::styled("📋 BATCH MODE INSTRUCTIONS:", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+                Span::styled("📋 BATCH MODE:", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
             ]),
             Line::from(vec![
                 Span::styled("1. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Paste a YouTube URL in the input box above"),
+                Span::raw("Paste URL, press "),
+                Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
+                Span::raw(" to add"),
             ]),
             Line::from(vec![
                 Span::styled("2. ", Style::default().fg(Color::Yellow)),
                 Span::raw("Press "),
-                Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" to add it to the batch queue"),
-            ]),
-            Line::from(vec![
-                Span::styled("3. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Repeat for all URLs you want to download"),
-            ]),
-            Line::from(vec![
-                Span::styled("4. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Press "),
                 Span::styled("Ctrl+D", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" to start downloading all URLs at 128kbps"),
-            ]),
-            Line::from(vec![
-                Span::styled("5. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Press "),
-                Span::styled("Ctrl+B", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" to switch back to single URL mode"),
+                Span::raw(" to start batch download"),
             ]),
         ]
     } else {
         vec![
             Line::from(vec![
-                Span::styled("📋 SINGLE URL MODE INSTRUCTIONS:", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+                Span::styled("📋 SINGLE MODE:", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
             ]),
             Line::from(vec![
                 Span::styled("1. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Paste a YouTube URL in the input box above"),
+                Span::raw("Paste URL, press "),
+                Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
+                Span::raw(" to download"),
             ]),
             Line::from(vec![
                 Span::styled("2. ", Style::default().fg(Color::Yellow)),
                 Span::raw("Press "),
-                Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" to download at 128kbps, or use Tab to switch buttons"),
-            ]),
-            Line::from(vec![
-                Span::styled("3. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Press "),
                 Span::styled("Ctrl+B", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" to switch to batch mode for multiple URLs"),
-            ]),
-            Line::from(vec![
-                Span::styled("4. ", Style::default().fg(Color::Yellow)),
-                Span::raw("Files are saved to: ~/Downloads/dj-cli/"),
-            ]),
-            Line::from(vec![
-                Span::styled("💡 Tip: ", Style::default().fg(Color::Magenta)),
-                Span::raw("Use batch mode to download multiple songs at once!"),
+                Span::raw(" for batch mode"),
             ]),
         ]
     };
@@ -272,30 +246,22 @@ pub fn render(frame: &mut Frame, app: &App) {
         vec![
             Line::from(vec![
                 Span::styled("Enter", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Add URL | "),
+                Span::raw(" - Add | "),
                 Span::styled("Ctrl+D", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Start batch | "),
+                Span::raw(" - Download | "),
                 Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Toggle mode"),
-            ]),
-            Line::from(vec![
-                Span::styled("Esc/Ctrl+C", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Quit"),
+                Span::raw(" - Toggle"),
             ]),
         ]
     } else {
         vec![
             Line::from(vec![
                 Span::styled("Tab", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Switch focus | "),
+                Span::raw(" - Focus | "),
                 Span::styled("Enter", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Convert | "),
+                Span::raw(" - Download | "),
                 Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Batch mode"),
-            ]),
-            Line::from(vec![
-                Span::styled("Esc/Ctrl+C", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Quit"),
+                Span::raw(" - Batch"),
             ]),
         ]
     };
