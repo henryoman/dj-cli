@@ -1,5 +1,5 @@
 use color_eyre::Result;
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{DefaultTerminal, Frame};
 // Removed ratatui_input for simplicity
 use std::path::PathBuf;
@@ -86,14 +86,8 @@ impl App {
             
             // Handle events
             if event::poll(Duration::from_millis(100))? {
-                match event::read()? {
-                    Event::Key(key) => {
-                        self.handle_key_event(key).await?;
-                    }
-                    Event::Mouse(mouse) => {
-                        self.handle_mouse_event(mouse).await?;
-                    }
-                    _ => {}
+                if let Event::Key(key) = event::read()? {
+                    self.handle_key_event(key).await?;
                 }
             }
         }
@@ -199,69 +193,6 @@ impl App {
                     }
                 }
             }
-        }
-        
-        Ok(())
-    }
-
-    /// Handle mouse events
-    async fn handle_mouse_event(&mut self, mouse: MouseEvent) -> Result<()> {
-        match mouse.kind {
-            MouseEventKind::Down(_) => {
-                // Handle mouse clicks
-                let (x, y) = (mouse.column, mouse.row);
-                info!("Mouse click at ({}, {})", x, y);
-                
-                // Get terminal size to calculate relative positions
-                let terminal_size = crossterm::terminal::size()?;
-                let terminal_width = terminal_size.0;
-                let terminal_height = terminal_size.1;
-                
-                // Calculate relative positions (0-100)
-                let rel_x = (x as f32 / terminal_width as f32 * 100.0) as u16;
-                let rel_y = (y as f32 / terminal_height as f32 * 100.0) as u16;
-                
-                info!("Relative position: ({}, {})", rel_x, rel_y);
-                
-                // Check if click is in input area (roughly 15-25% of screen height)
-                if rel_y >= 15 && rel_y <= 25 {
-                    self.focus = Focus::Input;
-                    info!("Input field focused via mouse");
-                }
-                // Check if click is in button area (roughly 30-40% of screen height)
-                else if rel_y >= 30 && rel_y <= 40 {
-                    if rel_x < 40 {
-                        // Left button (256kbps)
-                        if !self.batch_mode {
-                            self.focus = Focus::Download256;
-                            self.start_download(256).await?;
-                        }
-                        info!("256kbps button clicked");
-                    } else if rel_x >= 40 && rel_x < 80 {
-                        // Middle button (128kbps)
-                        if !self.batch_mode {
-                            self.focus = Focus::Download128;
-                            self.start_download(128).await?;
-                        }
-                        info!("128kbps button clicked");
-                    } else if rel_x >= 80 && self.batch_mode {
-                        // Right button (plus button) - only in batch mode
-                        // Add current URL to batch
-                        let url = self.input.trim().to_string();
-                        if !url.is_empty() {
-                            if url.contains("youtube.com") || url.contains("youtu.be") {
-                                self.batch_urls.push(url.clone());
-                                self.status_message = format!("✅ Added to batch: {} (Total: {})", url, self.batch_urls.len());
-                                self.input.clear();
-                            } else {
-                                self.status_message = "❌ Please enter a valid YouTube URL".to_string();
-                            }
-                        }
-                        info!("Plus button clicked");
-                    }
-                }
-            }
-            _ => {}
         }
         
         Ok(())

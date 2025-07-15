@@ -82,9 +82,8 @@ pub fn render(frame: &mut Frame, app: &App) {
     let button_chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(40), // 256kbps button
-            Constraint::Percentage(40), // 128kbps button
-            Constraint::Percentage(20), // Plus button (only in batch mode)
+            Constraint::Percentage(50), // 256kbps button
+            Constraint::Percentage(50), // 128kbps button
         ])
         .split(chunks[4]);
 
@@ -148,22 +147,7 @@ pub fn render(frame: &mut Frame, app: &App) {
         );
     frame.render_widget(download_128_button, button_chunks[1]);
 
-    // Plus button (only show in batch mode)
-    if app.batch_mode {
-        let plus_button_style = Style::default()
-            .bg(Color::Magenta)
-            .fg(Color::White)
-            .add_modifier(Modifier::BOLD);
 
-        let plus_button = Paragraph::new("➕ Add to Batch")
-            .style(plus_button_style)
-            .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .border_style(Style::default().fg(Color::Magenta)),
-            );
-        frame.render_widget(plus_button, button_chunks[2]);
-    }
 
     // Status message
     let status_color = match app.download_status {
@@ -225,8 +209,6 @@ pub fn render(frame: &mut Frame, app: &App) {
                 Span::styled("2. ", Style::default().fg(Color::Yellow)),
                 Span::raw("Press "),
                 Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" or click "),
-                Span::styled("➕ Add to Batch", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD)),
                 Span::raw(" to add it to the batch queue"),
             ]),
             Line::from(vec![
@@ -259,7 +241,7 @@ pub fn render(frame: &mut Frame, app: &App) {
                 Span::styled("2. ", Style::default().fg(Color::Yellow)),
                 Span::raw("Press "),
                 Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                Span::raw(" or click the download buttons to download at 128kbps"),
+                Span::raw(" to download at 128kbps, or use Tab to switch buttons"),
             ]),
             Line::from(vec![
                 Span::styled("3. ", Style::default().fg(Color::Yellow)),
@@ -287,16 +269,14 @@ pub fn render(frame: &mut Frame, app: &App) {
     let help_text = if app.batch_mode {
         vec![
             Line::from(vec![
-                Span::styled("🖱️ Click", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-                Span::raw(" buttons or "),
                 Span::styled("Enter", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Add URL | "),
                 Span::styled("Ctrl+D", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Start batch"),
+                Span::raw(" - Start batch | "),
+                Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::raw(" - Toggle mode"),
             ]),
             Line::from(vec![
-                Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Toggle mode | "),
                 Span::styled("Esc/Ctrl+C", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Quit"),
             ]),
@@ -304,16 +284,14 @@ pub fn render(frame: &mut Frame, app: &App) {
     } else {
         vec![
             Line::from(vec![
-                Span::styled("🖱️ Click", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-                Span::raw(" buttons or "),
                 Span::styled("Tab", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Switch focus | "),
                 Span::styled("Enter", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Convert"),
+                Span::raw(" - Convert | "),
+                Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::raw(" - Batch mode"),
             ]),
             Line::from(vec![
-                Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::raw(" - Batch mode | "),
                 Span::styled("Esc/Ctrl+C", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Quit"),
             ]),
