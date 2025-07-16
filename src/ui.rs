@@ -54,7 +54,7 @@ pub fn render(frame: &mut Frame, app: &App) {
     
     let title = Paragraph::new(title_text)
         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
-        .block(Block::default());
+        .alignment(ratatui::layout::Alignment::Center);
     frame.render_widget(title, chunks[0]);
 
     // Input box

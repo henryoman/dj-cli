@@ -26,6 +26,8 @@ pub struct App {
     pub batch_urls: Vec<String>,
     /// Current batch download progress
     pub batch_progress: BatchProgress,
+    /// Should clear the frame on next draw
+    pub should_clear: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -73,6 +75,7 @@ impl App {
                 completed: Vec::new(),
                 failed: Vec::new(),
             },
+            should_clear: false,
         }
     }
 
@@ -81,9 +84,13 @@ impl App {
         info!("Starting main app loop");
         
         while self.running {
+            // Only clear the terminal if needed (best practice)
+            if self.should_clear {
+                terminal.clear()?;
+                self.should_clear = false;
+            }
             // Draw UI
             terminal.draw(|frame| self.draw(frame))?;
-            
             // Handle events
             if event::poll(Duration::from_millis(100))? {
                 if let Event::Key(key) = event::read()? {
@@ -119,6 +126,7 @@ impl App {
                 if key.modifiers.contains(KeyModifiers::CONTROL) {
                     // Toggle batch mode with Ctrl+B
                     self.batch_mode = !self.batch_mode;
+                    self.should_clear = true;
                     if self.batch_mode {
                         self.status_message = "🎯 Batch mode ON - Add URLs with Enter, download with Ctrl+D".to_string();
                         self.batch_urls.clear();
