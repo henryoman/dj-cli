@@ -5,6 +5,8 @@ description = "A CLI tool for DJs to download MP3s from YouTube"
 authors = ["Henryoman <henryoman@mac.com>"]
 license = "MIT"
 edition = "2024"
+readme = "README.md"
+repository = "https://github.com/henryoman/dj-cli"
 
 [dependencies]
 crossterm = { version = "0.28.1", features = ["event-stream"] }
