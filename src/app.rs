@@ -3,9 +3,9 @@ use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{DefaultTerminal, Frame};
 // Removed ratatui_input for simplicity
 use std::path::PathBuf;
-use std::time::Duration;
+use std::time::{Duration, UNIX_EPOCH};
+use std::{fs, process::Stdio};
 use tracing::{info, warn, error};
-use std::process::Stdio;
 use regex::Regex;
 
 // Maximum input length to prevent memory issues and UI corruption
@@ -464,7 +464,6 @@ impl App {
         Ok(())
     }
 
-    /// Download MP3 using rusty_ytdl (pure Rust, no external dependencies)
     /// Download MP3 using yt-dlp - clean and simple (2025 best practice)
     async fn download_mp3(
         &self,
@@ -472,7 +471,10 @@ impl App {
         output_dir: PathBuf,
         bitrate: u32,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        // Create simple filename template - just title.mp3 in Downloads
+        // Step 1: Get list of existing MP3 files BEFORE download
+        let existing_mp3s = self.get_mp3_files(&output_dir).await.unwrap_or_default();
+
+        // Step 2: Do the actual download (back to working logic)
         let output_template = output_dir.join("%(title)s.%(ext)s");
         
         let mut cmd = tokio::process::Command::new("yt-dlp");
@@ -503,36 +505,65 @@ impl App {
             return Err("Download failed. Check if the YouTube URL is valid and accessible.".into());
         }
 
-        // Find the downloaded MP3 file in Downloads folder
-        let mut files = tokio::fs::read_dir(&output_dir).await?;
-        let mut newest_mp3: Option<(PathBuf, std::time::SystemTime)> = None;
+        // Give the file system a moment to update
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+
+        // Step 3: Get list of MP3 files AFTER download
+        let new_mp3s = self.get_mp3_files(&output_dir).await.unwrap_or_default();
+
+        // Step 4: Find the NEW file (difference between before and after)
+        let new_file = new_mp3s.iter()
+            .find(|file| !existing_mp3s.contains(file))
+            .cloned()
+            .unwrap_or_else(|| {
+                // If no new file found, try to get the most recently modified MP3
+                fs::read_dir(&output_dir)
+                    .ok()
+                    .and_then(|entries| {
+                        entries
+                            .filter_map(|e| e.ok())
+                            .filter(|e| e.path().extension().map_or(false, |ext| ext == "mp3"))
+                            .max_by_key(|e| e.metadata().and_then(|m| m.modified()).unwrap_or(UNIX_EPOCH))
+                            .and_then(|e| e.file_name().to_str().map(|s| s.to_string()))
+                    })
+                    .unwrap_or_else(|| "Unknown.mp3".to_string())
+            });
+
+        Ok(format!("✅ Downloaded: {}", new_file))
+    }
+
+    /// Helper function to get all MP3 filenames in a directory
+    async fn get_mp3_files(&self, dir: &PathBuf) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+        let mut mp3_files = Vec::new();
         
-        while let Some(file) = files.next_entry().await? {
-            let path = file.path();
-            if path.extension().and_then(|s| s.to_str()) == Some("mp3") {
-                if let Ok(metadata) = file.metadata().await {
-                    if let Ok(modified) = metadata.modified() {
-                        match newest_mp3 {
-                            None => newest_mp3 = Some((path, modified)),
-                            Some((_, existing_time)) if modified > existing_time => {
-                                newest_mp3 = Some((path, modified));
+        // Check if directory exists
+        if !dir.exists() {
+            return Ok(mp3_files);
+        }
+        
+        let mut entries = tokio::fs::read_dir(dir).await?;
+        
+        while let Some(entry) = entries.next_entry().await? {
+            let path = entry.path();
+            
+            // Only process files (not directories)
+            if path.is_file() {
+                if let Some(extension) = path.extension() {
+                    if extension == "mp3" {
+                        if let Some(filename) = path.file_name() {
+                            if let Some(filename_str) = filename.to_str() {
+                                // Only add non-empty filenames that actually contain text
+                                if !filename_str.is_empty() && filename_str.len() > 4 {
+                                    mp3_files.push(filename_str.to_string());
+                                }
                             }
-                            _ => {}
                         }
                     }
                 }
             }
         }
-
-        match newest_mp3 {
-            Some((path, _)) => {
-                let filename = path.file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or("audio.mp3");
-                Ok(format!("✅ Downloaded: {}", filename))
-            }
-            None => Err("MP3 file not found after download".into())
-        }
+        
+        Ok(mp3_files)
     }
 
     /// Get the current input value
