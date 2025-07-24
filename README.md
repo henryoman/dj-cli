@@ -10,7 +10,7 @@
     <img src="https://img.shields.io/crates/v/dj-cli?label=crates.io&logo=rust&color=orange" alt="Crates.io version"/>
   </a>
   <a href="https://docs.rs/dj-cli">
-    <img src="https://img.shields.io/docsrs/dj-cli?label=docs.rs" alt="docs.rs status"/>
+    <img src="https://docs.rs/dj-cli/badge.svg" alt="docs.rs status"/>
   </a>
   <a href="https://github.com/henryoman/dj-cli/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/henryoman/dj-cli/ci.yml?branch=main&label=CI&logo=github" alt="Build Status"/>
