@@ -33,6 +33,8 @@ pub struct App {
     pub batch_progress: BatchProgress,
     /// Should clear the frame on next draw
     pub should_clear: bool,
+    /// Download history for display
+    pub download_history: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -79,6 +81,7 @@ impl App {
                 failed: Vec::new(),
             },
             should_clear: false,
+            download_history: Vec::new(),
         }
     }
 
@@ -390,6 +393,14 @@ impl App {
         // Download completed successfully
         self.download_status = DownloadStatus::Success(file_path.clone());
         self.status_message = format!("✅ Successfully downloaded: {}", file_path);
+        
+        // Add to download history for display - extract just the filename
+        if let Some(filename) = file_path.strip_prefix("✅ Downloaded: ") {
+            self.download_history.push(filename.to_string());
+        } else {
+            // Fallback in case format changes
+            self.download_history.push(file_path.clone());
+        }
 
         Ok(())
     }
@@ -420,9 +431,16 @@ impl App {
             self.status_message = format!("📥 Downloading {}/{}: {}", index + 1, self.batch_urls.len(), url);
 
             match self.download_mp3(url.clone(), output_dir.clone(), bitrate).await {
-                Ok(_file_path) => {
+                Ok(file_path) => {
                     // Batch download completed successfully
                     self.batch_progress.completed.push(url.clone());
+                    // Add to download history for display - extract just the filename
+                    if let Some(filename) = file_path.strip_prefix("✅ Downloaded: ") {
+                        self.download_history.push(filename.to_string());
+                    } else {
+                        // Fallback in case format changes
+                        self.download_history.push(file_path);
+                    }
                 }
                 Err(e) => {
                     error!("Download failed for {}: {}", url, e);
