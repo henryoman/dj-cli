@@ -471,12 +471,13 @@ impl App {
         
         let mut cmd = tokio::process::Command::new("yt-dlp");
         cmd.args(&[
-            "--extract-audio",                              // Audio only - no video
-            "--audio-format", "mp3",                        // MP3 format
+            "--format", "bestaudio",                        // Download ONLY audio stream (no video)
+            "--extract-audio",                              // Extract to final format
+            "--audio-format", "mp3",                        // Convert to MP3
             "--audio-quality", &format!("{}K", bitrate),    // Bitrate (128K/256K)
             "--output", &output_template.to_string_lossy(), // Save to Downloads/[title].mp3
             "--no-playlist",                                // Single video only
-            "--prefer-ffmpeg",                             // Use ffmpeg
+            "--prefer-ffmpeg",                             // Use ffmpeg for conversion
             "--embed-thumbnail",                           // Add album art
             "--add-metadata",                              // Add metadata
             "--no-warnings",                               // Suppress warnings
