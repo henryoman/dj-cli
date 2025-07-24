@@ -1,6 +1,6 @@
 use color_eyre::Result;
 use tracing::{info, error};
-use tracing_subscriber;
+// use tracing_subscriber;
 
 pub mod app;
 pub mod ui;
@@ -12,8 +12,8 @@ async fn main() -> Result<()> {
     // Initialize error handling
     color_eyre::install()?;
     
-    // Initialize logging (2025 best practice)
-    tracing_subscriber::fmt::init();
+    // Disable logging to keep TUI clean
+    // tracing_subscriber::fmt::init();
     
     info!("Starting DJ CLI");
     

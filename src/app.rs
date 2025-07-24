@@ -385,9 +385,9 @@ impl App {
     /// Perform the actual download with proper error isolation
     async fn perform_download(&mut self, url: String, bitrate: u32) -> Result<()> {
 
-        info!("Starting download for URL: {} at {}kbps", url, bitrate);
+        // Starting download silently  
         self.download_status = DownloadStatus::Downloading;
-        self.status_message = format!("Downloading at {}kbps... Please wait", bitrate);
+        self.status_message = format!("🎵 Downloading MP3 at {}kbps... Please wait", bitrate);
 
         // Download directly to Downloads folder (no subfolder)
         let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
@@ -396,9 +396,9 @@ impl App {
         // Download using yt-dlp - clean and simple
         let file_path = self.download_mp3(url, output_dir, bitrate).await
             .map_err(|e| color_eyre::eyre::eyre!("Download failed: {}", e))?;
-        info!("Successfully downloaded: {}", file_path);
+        // Download completed successfully
         self.download_status = DownloadStatus::Success(file_path.clone());
-        self.status_message = format!("✅ Successfully downloaded to: {}", file_path);
+        self.status_message = format!("✅ Successfully downloaded: {}", file_path);
 
         Ok(())
     }
@@ -429,8 +429,8 @@ impl App {
             self.status_message = format!("📥 Downloading {}/{}: {}", index + 1, self.batch_urls.len(), url);
 
             match self.download_mp3(url.clone(), output_dir.clone(), bitrate).await {
-                Ok(file_path) => {
-                    info!("Successfully downloaded: {}", file_path);
+                Ok(_file_path) => {
+                    // Batch download completed successfully
                     self.batch_progress.completed.push(url.clone());
                 }
                 Err(e) => {
