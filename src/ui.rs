@@ -249,8 +249,14 @@ pub fn render(frame: &mut Frame, app: &App) {
                 Span::raw(" - Add | "),
                 Span::styled("Ctrl+D", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Download | "),
+                Span::styled("F5", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::raw(" - Clean | "),
                 Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Toggle"),
+            ]),
+            Line::from(vec![
+                Span::styled("💡 Tip:", Style::default().fg(Color::Cyan)),
+                Span::raw(" Paste any text with YouTube URLs - auto-sanitized up to 500 chars"),
             ]),
         ]
     } else {
@@ -260,8 +266,14 @@ pub fn render(frame: &mut Frame, app: &App) {
                 Span::raw(" - Focus | "),
                 Span::styled("Enter", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Download | "),
+                Span::styled("F5", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::raw(" - Clean | "),
                 Span::styled("Ctrl+B", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw(" - Batch"),
+            ]),
+            Line::from(vec![
+                Span::styled("💡 Tip:", Style::default().fg(Color::Cyan)),
+                Span::raw(" Paste messy text - URLs auto-extracted, input sanitized & limited"),
             ]),
         ]
     };
