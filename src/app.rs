@@ -54,8 +54,6 @@ pub enum DownloadStatus {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Focus {
     Input,
-    Download256,
-    Download128,
 }
 
 impl Default for App {
@@ -69,7 +67,7 @@ impl App {
         Self {
             running: true,
             input: String::new(),
-            status_message: "Paste a YouTube URL and press Convert to download MP3".to_string(),
+            status_message: "Paste a YouTube URL and press Enter to download MP3".to_string(),
             download_status: DownloadStatus::Idle,
             focus: Focus::Input,
             batch_mode: false,
@@ -270,12 +268,8 @@ impl App {
                 self.input.clear();
             }
             KeyCode::Tab => {
-                // Switch focus between input and buttons
-                self.focus = match self.focus {
-                    Focus::Input => Focus::Download256,
-                    Focus::Download256 => Focus::Download128,
-                    Focus::Download128 => Focus::Input,
-                };
+                // Tab does nothing now since we only have input focus
+                // Keeping this for compatibility but it doesn't change focus
             }
             KeyCode::F(5) => {
                 // F5 to clear input and extract URL from current content
@@ -309,9 +303,7 @@ impl App {
                     }
                 } else {
                     // Handle regular 'b' character input
-                    if self.batch_mode || self.focus == Focus::Input {
-                        self.handle_char_input(c);
-                    }
+                    self.handle_char_input(c);
                 }
             }
             KeyCode::Char(c @ ('d' | 'D')) => {
@@ -320,9 +312,7 @@ impl App {
                     self.start_batch_download(128).await?;
                 } else {
                     // Handle regular 'd' character input
-                    if self.batch_mode || self.focus == Focus::Input {
-                        self.handle_char_input(c);
-                    }
+                    self.handle_char_input(c);
                 }
             }
             KeyCode::Char('1') if key.modifiers.contains(KeyModifiers::CONTROL) => {
@@ -346,9 +336,7 @@ impl App {
             }
             KeyCode::Char(c) => {
                 // Handle other character input
-                if self.batch_mode || self.focus == Focus::Input {
-                    self.handle_char_input(c);
-                }
+                self.handle_char_input(c);
             }
             _ => {}
         }
@@ -536,17 +524,7 @@ impl App {
 
     /// Check if input field is focused
     pub fn is_input_focused(&self) -> bool {
-        self.focus == Focus::Input
-    }
-
-    /// Check if 256kbps button is focused
-    pub fn is_256_focused(&self) -> bool {
-        self.focus == Focus::Download256
-    }
-
-    /// Check if 128kbps button is focused
-    pub fn is_128_focused(&self) -> bool {
-        self.focus == Focus::Download128
+        true // Always focused now since it's the only element
     }
 
 }
