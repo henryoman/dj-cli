@@ -388,6 +388,9 @@ impl App {
         // Starting download silently  
         self.download_status = DownloadStatus::Downloading;
         self.status_message = format!("🎵 Downloading MP3 at {}kbps... Please wait", bitrate);
+        
+        // Clear the input field when download starts
+        self.input.clear();
 
         // Download directly to Downloads folder (no subfolder)
         let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
