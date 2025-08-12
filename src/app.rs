@@ -2,11 +2,11 @@ use color_eyre::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{DefaultTerminal, Frame};
 // Removed ratatui_input for simplicity
+use regex::Regex;
 use std::path::PathBuf;
 use std::time::{Duration, UNIX_EPOCH};
 use std::{fs, process::Stdio};
-use tracing::{info, warn, error};
-use regex::Regex;
+use tracing::{error, info, warn};
 
 // Maximum input length to prevent memory issues and UI corruption
 const MAX_INPUT_LENGTH: usize = 500;
@@ -25,24 +25,8 @@ pub struct App {
     pub download_status: DownloadStatus,
     /// Focus state (Input or Convert button)
     pub focus: Focus,
-    /// Batch mode enabled
-    pub batch_mode: bool,
-    /// List of URLs for batch download
-    pub batch_urls: Vec<String>,
-    /// Current batch download progress
-    pub batch_progress: BatchProgress,
-    /// Should clear the frame on next draw
-    pub should_clear: bool,
     /// Download history for display
     pub download_history: Vec<String>,
-}
-
-#[derive(Debug, Clone)]
-pub struct BatchProgress {
-    pub current: usize,
-    pub total: usize,
-    pub completed: Vec<String>,
-    pub failed: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -72,15 +56,6 @@ impl App {
             status_message: "Paste a YouTube URL and press Enter to download MP3".to_string(),
             download_status: DownloadStatus::Idle,
             focus: Focus::Input,
-            batch_mode: false,
-            batch_urls: Vec::new(),
-            batch_progress: BatchProgress {
-                current: 0,
-                total: 0,
-                completed: Vec::new(),
-                failed: Vec::new(),
-            },
-            should_clear: false,
             download_history: Vec::new(),
         }
     }
@@ -88,13 +63,8 @@ impl App {
     /// Main application loop
     pub async fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         info!("Starting main app loop");
-        
+
         while self.running {
-            // Only clear the terminal if needed (best practice)
-            if self.should_clear {
-                terminal.clear()?;
-                self.should_clear = false;
-            }
             // Draw UI
             terminal.draw(|frame| self.draw(frame))?;
             // Handle events
@@ -104,7 +74,7 @@ impl App {
                 }
             }
         }
-        
+
         info!("App loop finished");
         Ok(())
     }
@@ -118,7 +88,11 @@ impl App {
     fn sanitize_input(&mut self, input: &str) -> String {
         // First, truncate if too long
         let truncated = if input.len() > MAX_PASTE_LENGTH {
-            warn!("Input truncated from {} to {} characters", input.len(), MAX_PASTE_LENGTH);
+            warn!(
+                "Input truncated from {} to {} characters",
+                input.len(),
+                MAX_PASTE_LENGTH
+            );
             &input[..MAX_PASTE_LENGTH]
         } else {
             input
@@ -133,7 +107,11 @@ impl App {
         // If no URL found, clean the text and apply length limit
         let cleaned = self.clean_text(truncated);
         if cleaned.len() > MAX_INPUT_LENGTH {
-            warn!("Cleaned input truncated from {} to {} characters", cleaned.len(), MAX_INPUT_LENGTH);
+            warn!(
+                "Cleaned input truncated from {} to {} characters",
+                cleaned.len(),
+                MAX_INPUT_LENGTH
+            );
             cleaned[..MAX_INPUT_LENGTH].to_string()
         } else {
             cleaned
@@ -177,7 +155,7 @@ impl App {
                 c.is_ascii_graphic() || c.is_ascii_whitespace() || (*c as u32) > 127
             })
             .collect::<String>()
-            .split_whitespace()  // Normalize whitespace
+            .split_whitespace() // Normalize whitespace
             .collect::<Vec<_>>()
             .join(" ")
     }
@@ -186,8 +164,11 @@ impl App {
     fn handle_char_input(&mut self, c: char) {
         // Check if adding this character would exceed the limit
         if self.input.len() >= MAX_INPUT_LENGTH {
-            warn!("Input at maximum length ({}), ignoring character", MAX_INPUT_LENGTH);
-            self.status_message = format!("Input limit reached ({} characters)", MAX_INPUT_LENGTH);
+            warn!(
+                "Input at maximum length ({}), ignoring character",
+                MAX_INPUT_LENGTH
+            );
+            self.status_message = format!("Input limit reached ({MAX_INPUT_LENGTH} characters)");
             return;
         }
 
@@ -198,10 +179,11 @@ impl App {
         }
 
         self.input.push(c);
-        
+
         // Clear any previous status messages when user types normally
-        if self.status_message.starts_with("Input limit reached") || 
-           self.status_message.starts_with("Large input sanitized") {
+        if self.status_message.starts_with("Input limit reached")
+            || self.status_message.starts_with("Large input sanitized")
+        {
             self.status_message.clear();
         }
     }
@@ -210,17 +192,22 @@ impl App {
     fn handle_paste(&mut self, pasted_text: &str) {
         let original_len = pasted_text.len();
         let sanitized = self.sanitize_input(pasted_text);
-        
+
         if sanitized != pasted_text {
             if original_len > MAX_PASTE_LENGTH {
                 self.status_message = format!(
-                    "Large input sanitized: {} → {} chars (extracted URL or cleaned text)", 
-                    original_len, sanitized.len()
+                    "Large input sanitized: {} → {} chars (extracted URL or cleaned text)",
+                    original_len,
+                    sanitized.len()
                 );
             } else {
                 self.status_message = "Input cleaned and URL extracted".to_string();
             }
-            info!("Input sanitized: original {} chars → {} chars", original_len, sanitized.len());
+            info!(
+                "Input sanitized: original {} chars → {} chars",
+                original_len,
+                sanitized.len()
+            );
         }
 
         // Replace the current input with sanitized content
@@ -239,7 +226,7 @@ impl App {
         // Use a separate method for handling that can't crash the UI
         if let Err(e) = self.handle_key_event_safe(key).await {
             error!("Error handling key event: {}", e);
-            self.status_message = format!("Error: {}", e);
+            self.status_message = format!("Error: {e}");
             // Don't crash the UI - just show the error message
         }
 
@@ -254,14 +241,7 @@ impl App {
             }
             KeyCode::Enter => {
                 if !self.input.trim().is_empty() {
-                    if self.batch_mode {
-                        self.batch_urls.push(self.input.clone());
-                        self.status_message = format!("Added URL {} to batch (total: {})", 
-                            self.batch_urls.len(), self.batch_urls.len());
-                        self.input.clear();
-                    } else {
-                        self.start_download(128).await?;
-                    }
+                    self.start_download(128).await?;
                 }
             }
             KeyCode::Backspace => {
@@ -281,43 +261,6 @@ impl App {
                     self.handle_paste(&original);
                 }
             }
-            KeyCode::Char(c @ ('b' | 'B')) => {
-                if key.modifiers.contains(KeyModifiers::CONTROL) {
-                    // Toggle batch mode with Ctrl+B
-                    self.batch_mode = !self.batch_mode;
-                    self.should_clear = true;
-                    if self.batch_mode {
-                        self.status_message = "🎯 Batch mode ON - Add URLs with Enter, download with Ctrl+D".to_string();
-                        self.batch_urls.clear();
-                        self.batch_progress = BatchProgress {
-                            current: 0,
-                            total: 0,
-                            completed: Vec::new(),
-                            failed: Vec::new(),
-                        };
-                    } else {
-                        self.status_message = "Single URL mode - Paste a YouTube URL and press Enter to download".to_string();
-                        self.batch_progress = BatchProgress {
-                            current: 0,
-                            total: 0,
-                            completed: Vec::new(),
-                            failed: Vec::new(),
-                        };
-                    }
-                } else {
-                    // Handle regular 'b' character input
-                    self.handle_char_input(c);
-                }
-            }
-            KeyCode::Char(c @ ('d' | 'D')) => {
-                if key.modifiers.contains(KeyModifiers::CONTROL) && self.batch_mode {
-                    // Start batch download with Ctrl+D
-                    self.start_batch_download(128).await?;
-                } else {
-                    // Handle regular 'd' character input
-                    self.handle_char_input(c);
-                }
-            }
             KeyCode::Char('1') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 if !self.input.trim().is_empty() {
                     self.start_download(128).await?;
@@ -330,7 +273,9 @@ impl App {
             }
             KeyCode::Char('v') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 // Handle Ctrl+V paste - for now just inform user about F5
-                self.status_message = "💡 Paste detected! Press F5 to clean and extract URL from pasted content".to_string();
+                self.status_message =
+                    "💡 Paste detected! Press F5 to clean and extract URL from pasted content"
+                        .to_string();
                 info!("Ctrl+V detected - user should use F5 for URL extraction");
             }
             KeyCode::Char('a') if key.modifiers.contains(KeyModifiers::CONTROL) => {
@@ -338,8 +283,12 @@ impl App {
                 info!("Ctrl+A detected - clearing input");
             }
             KeyCode::Char(c) => {
-                // Handle other character input
-                self.handle_char_input(c);
+                if key.modifiers.contains(KeyModifiers::CONTROL) {
+                    // Ignore other Ctrl+char combinations
+                } else {
+                    // Handle regular character input
+                    self.handle_char_input(c);
+                }
             }
             _ => {}
         }
@@ -350,7 +299,7 @@ impl App {
     /// Start downloading the YouTube video as MP3 with robust error handling
     async fn start_download(&mut self, bitrate: u32) -> Result<()> {
         let url = self.input.trim();
-        
+
         if url.is_empty() {
             self.status_message = "Please enter a YouTube URL".to_string();
             warn!("Empty URL provided");
@@ -367,19 +316,18 @@ impl App {
         if let Err(e) = self.perform_download(url.to_string(), bitrate).await {
             error!("Download failed: {}", e);
             self.download_status = DownloadStatus::Error(e.to_string());
-            self.status_message = format!("❌ Download failed: {}", e);
+            self.status_message = format!("❌ Download failed: {e}");
         }
-        
+
         Ok(())
     }
 
     /// Perform the actual download with proper error isolation
     async fn perform_download(&mut self, url: String, bitrate: u32) -> Result<()> {
-
-        // Starting download silently  
+        // Starting download silently
         self.download_status = DownloadStatus::Downloading;
-        self.status_message = format!("🎵 Downloading MP3 at {}kbps... Please wait", bitrate);
-        
+        self.status_message = format!("🎵 Downloading MP3 at {bitrate}kbps... Please wait");
+
         // Clear the input field when download starts
         self.input.clear();
 
@@ -388,77 +336,20 @@ impl App {
         let output_dir = PathBuf::from(home).join("Downloads");
 
         // Download using yt-dlp - clean and simple
-        let file_path = self.download_mp3(url, output_dir, bitrate).await
+        let file_path = self
+            .download_mp3(url, output_dir, bitrate)
+            .await
             .map_err(|e| color_eyre::eyre::eyre!("Download failed: {}", e))?;
         // Download completed successfully
         self.download_status = DownloadStatus::Success(file_path.clone());
-        self.status_message = format!("✅ Successfully downloaded: {}", file_path);
-        
+        self.status_message = format!("✅ Successfully downloaded: {file_path}");
+
         // Add to download history for display - extract just the filename
         if let Some(filename) = file_path.strip_prefix("✅ Downloaded: ") {
             self.download_history.push(filename.to_string());
         } else {
             // Fallback in case format changes
             self.download_history.push(file_path.clone());
-        }
-
-        Ok(())
-    }
-
-    /// Start batch downloading multiple YouTube videos as MP3
-    async fn start_batch_download(&mut self, bitrate: u32) -> Result<()> {
-        if self.batch_urls.is_empty() {
-            self.status_message = "❌ No URLs in batch. Add URLs with Enter first.".to_string();
-            return Ok(());
-        }
-
-        info!("Starting batch download for {} URLs at {}kbps", self.batch_urls.len(), bitrate);
-        self.download_status = DownloadStatus::Downloading;
-        self.batch_progress = BatchProgress {
-            current: 0,
-            total: self.batch_urls.len(),
-            completed: Vec::new(),
-            failed: Vec::new(),
-        };
-
-        // Download directly to Downloads folder (no subfolder)  
-        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-        let output_dir = PathBuf::from(home).join("Downloads");
-
-        // Download each URL in the batch
-        for (index, url) in self.batch_urls.iter().enumerate() {
-            self.batch_progress.current = index + 1;
-            self.status_message = format!("📥 Downloading {}/{}: {}", index + 1, self.batch_urls.len(), url);
-
-            match self.download_mp3(url.clone(), output_dir.clone(), bitrate).await {
-                Ok(file_path) => {
-                    // Batch download completed successfully
-                    self.batch_progress.completed.push(url.clone());
-                    // Add to download history for display - extract just the filename
-                    if let Some(filename) = file_path.strip_prefix("✅ Downloaded: ") {
-                        self.download_history.push(filename.to_string());
-                    } else {
-                        // Fallback in case format changes
-                        self.download_history.push(file_path);
-                    }
-                }
-                Err(e) => {
-                    error!("Download failed for {}: {}", url, e);
-                    self.batch_progress.failed.push(url.clone());
-                }
-            }
-        }
-
-        // Final status message
-        let success_count = self.batch_progress.completed.len();
-        let failed_count = self.batch_progress.failed.len();
-        
-        if failed_count == 0 {
-            self.status_message = format!("✅ Batch complete! All {} downloads successful", success_count);
-            self.download_status = DownloadStatus::Success(format!("{} files downloaded", success_count));
-        } else {
-            self.status_message = format!("⚠️ Batch complete: {} successful, {} failed", success_count, failed_count);
-            self.download_status = DownloadStatus::Success(format!("{} successful, {} failed", success_count, failed_count));
         }
 
         Ok(())
@@ -476,33 +367,43 @@ impl App {
 
         // Step 2: Do the actual download (back to working logic)
         let output_template = output_dir.join("%(title)s.%(ext)s");
-        
+
         let mut cmd = tokio::process::Command::new("yt-dlp");
-        cmd.args(&[
-            "--format", "bestaudio",                        // Download ONLY audio stream (no video)
-            "--extract-audio",                              // Extract to final format
-            "--audio-format", "mp3",                        // Convert to MP3
-            "--audio-quality", &format!("{}K", bitrate),    // Bitrate (128K/256K)
-            "--output", &output_template.to_string_lossy(), // Save to Downloads/[title].mp3
-            "--no-playlist",                                // Single video only
-            "--prefer-ffmpeg",                             // Use ffmpeg for conversion
-            "--embed-thumbnail",                           // Add album art
-            "--add-metadata",                              // Add metadata
-            "--no-warnings",                               // Suppress warnings
-            "--quiet",                                     // Minimal output
-            &url                                           // YouTube URL
+        let bitrate_arg = format!("{bitrate}K");
+        let output_arg = output_template.to_string_lossy().to_string();
+        cmd.args([
+            "--format",
+            "bestaudio",       // Download ONLY audio stream (no video)
+            "--extract-audio", // Extract to final format
+            "--audio-format",
+            "mp3", // Convert to MP3
+            "--audio-quality",
+            &bitrate_arg, // Bitrate (128K/256K)
+            "--output",
+            &output_arg,         // Save to Downloads/[title].mp3
+            "--no-playlist",     // Single video only
+            "--prefer-ffmpeg",   // Use ffmpeg for conversion
+            "--embed-thumbnail", // Add album art
+            "--add-metadata",    // Add metadata
+            "--no-warnings",     // Suppress warnings
+            "--quiet",           // Minimal output
+            url.as_str(),        // YouTube URL
         ]);
 
         // Completely suppress all output to keep TUI clean
         cmd.stdout(Stdio::null())
-           .stderr(Stdio::null())
-           .stdin(Stdio::null());
-        
-        let output = cmd.output().await
-            .map_err(|_| format!("yt-dlp not found. Please install: brew install yt-dlp"))?;
+            .stderr(Stdio::null())
+            .stdin(Stdio::null());
+
+        let output = cmd
+            .output()
+            .await
+            .map_err(|_| "yt-dlp not found. Please install: brew install yt-dlp".to_string())?;
 
         if !output.status.success() {
-            return Err("Download failed. Check if the YouTube URL is valid and accessible.".into());
+            return Err(
+                "Download failed. Check if the YouTube URL is valid and accessible.".into(),
+            );
         }
 
         // Give the file system a moment to update
@@ -512,7 +413,8 @@ impl App {
         let new_mp3s = self.get_mp3_files(&output_dir).await.unwrap_or_default();
 
         // Step 4: Find the NEW file (difference between before and after)
-        let new_file = new_mp3s.iter()
+        let new_file = new_mp3s
+            .iter()
             .find(|file| !existing_mp3s.contains(file))
             .cloned()
             .unwrap_or_else(|| {
@@ -522,30 +424,37 @@ impl App {
                     .and_then(|entries| {
                         entries
                             .filter_map(|e| e.ok())
-                            .filter(|e| e.path().extension().map_or(false, |ext| ext == "mp3"))
-                            .max_by_key(|e| e.metadata().and_then(|m| m.modified()).unwrap_or(UNIX_EPOCH))
-                            .and_then(|e| e.file_name().to_str().map(|s| s.to_string()))
+                            .filter(|e| e.path().extension().is_some_and(|ext| ext == "mp3"))
+                            .max_by_key(|e| {
+                                e.metadata()
+                                    .and_then(|m| m.modified())
+                                    .unwrap_or(UNIX_EPOCH)
+                            })
                     })
-                    .unwrap_or_else(|| "Unknown.mp3".to_string())
+                    .and_then(|e| e.file_name().into_string().ok())
+                    .unwrap_or_else(|| "unknown.mp3".to_string())
             });
 
-        Ok(format!("✅ Downloaded: {}", new_file))
+        Ok(format!("✅ Downloaded: {new_file}"))
     }
 
     /// Helper function to get all MP3 filenames in a directory
-    async fn get_mp3_files(&self, dir: &PathBuf) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    async fn get_mp3_files(
+        &self,
+        dir: &PathBuf,
+    ) -> Result<Vec<String>, Box<dyn std::error::Error>> {
         let mut mp3_files = Vec::new();
-        
+
         // Check if directory exists
         if !dir.exists() {
             return Ok(mp3_files);
         }
-        
+
         let mut entries = tokio::fs::read_dir(dir).await?;
-        
+
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
-            
+
             // Only process files (not directories)
             if path.is_file() {
                 if let Some(extension) = path.extension() {
@@ -562,7 +471,7 @@ impl App {
                 }
             }
         }
-        
+
         Ok(mp3_files)
     }
 
@@ -575,5 +484,4 @@ impl App {
     pub fn is_input_focused(&self) -> bool {
         true // Always focused now since it's the only element
     }
-
 }

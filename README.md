@@ -31,7 +31,7 @@
   <img src="dj-screenshot.png" alt="DJ-CLI Terminal Interface" width="800"/>
 </p>
 
-*DJ-CLI's beautiful terminal interface featuring real-time status updates, batch processing capabilities, and intuitive keyboard controls.*
+*DJ-CLI's beautiful terminal interface featuring real-time status updates and intuitive keyboard controls.*
 
 ---
 
@@ -41,7 +41,6 @@
 - **Lightning-fast downloads** using the battle-tested [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) backend
 - **High-quality audio extraction** with support for 128kbps and 256kbps MP3 output
 - **Smart URL extraction** from messy clipboard text - paste anything, get clean URLs
-- **Batch processing** - queue multiple videos and download them all at once
 - **Async operations** - non-blocking downloads with real-time progress updates
 
 ### 🎨 **Terminal User Interface**
@@ -171,32 +170,9 @@ cargo --version
    - DJ-CLI automatically extracts and cleans the URL from messy clipboard content
 
 3. **Choose Quality & Download**
-   - **Tab** to navigate between input field and download buttons
    - **Enter** for default 128kbps download
    - **Ctrl+1** for quick 128kbps download
    - **Ctrl+2** for quick 256kbps download
-
-### 🎯 Batch Download Mode
-
-1. **Enable Batch Mode**
-   ```
-   Press Ctrl+B to toggle batch mode
-   ```
-
-2. **Add Multiple URLs**
-   ```
-   Paste URL → Press Enter → Repeat for each video
-   ```
-
-3. **Start Batch Download**
-   ```
-   Press Ctrl+D to download all queued videos
-   ```
-
-4. **Monitor Progress**
-   - Real-time progress updates for each download
-   - Success/failure count at completion
-   - Detailed status for each URL in the queue
 
 ### 🎯 Advanced Features
 
@@ -211,10 +187,7 @@ cargo --version
 |----------|----------|
 | **Ctrl+C** | Quit application |
 | **Esc** | Exit application |
-| **Tab** | Switch focus between elements |
-| **Enter** | Download (single mode) / Add URL (batch mode) |
-| **Ctrl+B** | Toggle batch mode |
-| **Ctrl+D** | Start batch download |
+| **Enter** | Download |
 | **Ctrl+1** | Quick 128kbps download |
 | **Ctrl+2** | Quick 256kbps download |
 | **F5** | Clean and extract URL from input |
