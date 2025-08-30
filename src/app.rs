@@ -1,5 +1,5 @@
 use color_eyre::Result;
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::{DefaultTerminal, Frame};
 // Removed ratatui_input for simplicity
 use regex::Regex;
@@ -70,7 +70,9 @@ impl App {
             // Handle events
             if event::poll(Duration::from_millis(100))? {
                 if let Event::Key(key) = event::read()? {
-                    self.handle_key_event(key).await?;
+                    if key.kind == KeyEventKind::Press {
+                        self.handle_key_event(key).await?;
+                    }
                 }
             }
         }
