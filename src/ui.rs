@@ -33,37 +33,49 @@ pub fn render(frame: &mut Frame, app: &App) {
     // Title - Bright neon cyan (classic terminal green alternative)
     let title_text = vec![
         Line::from(vec![Span::styled(
-            " _____   ______          ___    _       _______ ",
+            " _____       _    _____ _      _____ ",
             Style::default()
                 .fg(Color::Rgb(0, 255, 255))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
-            "(_____) (______)       _(___)_ (_)     (_______)",
+            "|  __ \\     | |  / ____| |    |_   _|",
             Style::default()
                 .fg(Color::Rgb(0, 255, 255))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
-            "(_)  (_)     (_)      (_)   (_)(_)        (_)   ",
+            "| |  | |    | | | |    | |      | |  ",
             Style::default()
                 .fg(Color::Rgb(0, 255, 255))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
-            "(_)  (_) _   (_)      (_)    _ (_)        (_)   ",
+            "| |  | |_   | | | |    | |      | |  ",
             Style::default()
                 .fg(Color::Rgb(0, 255, 255))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
-            "(_)__(_)( )__(_)      (_)___(_)(_)____  __(_)__ ",
+            "| |__| | |__| | | |____| |____ _| |_ ",
             Style::default()
                 .fg(Color::Rgb(0, 255, 255))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
-            "(_____)  (____)         (___)  (______)(_______)",
+            "|_____/ \\____/   \\_____|______|_____|",
+            Style::default()
+                .fg(Color::Rgb(0, 255, 255))
+                .add_modifier(Modifier::BOLD),
+        )]),
+        Line::from(vec![Span::styled(
+            "                                     ",
+            Style::default()
+                .fg(Color::Rgb(0, 255, 255))
+                .add_modifier(Modifier::BOLD),
+        )]),
+        Line::from(vec![Span::styled(
+            "                                     ",
             Style::default()
                 .fg(Color::Rgb(0, 255, 255))
                 .add_modifier(Modifier::BOLD),
