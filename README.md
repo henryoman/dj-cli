@@ -376,6 +376,7 @@ of this software and associated documentation files...
 
 - **[yt-dlp team](https://github.com/yt-dlp/yt-dlp)** - Powerful YouTube download engine
 - **[Ratatui community](https://ratatui.rs)** - Excellent terminal UI framework
+- **[Orhun Parmaksız](https://github.com/orhun)** - Maintainer of Ratatui and open source champion from Ankara, Turkey
 - **[Rust community](https://www.rust-lang.org)** - Amazing language and ecosystem
 
 ---
