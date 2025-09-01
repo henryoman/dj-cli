@@ -35,49 +35,49 @@ pub fn render(frame: &mut Frame, app: &App) {
         Line::from(vec![Span::styled(
             " _____       _    _____ _      _____ ",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "|  __ \\     | |  / ____| |    |_   _|",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "| |  | |    | | | |    | |      | |  ",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "| |  | |_   | | | |    | |      | |  ",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "| |__| | |__| | | |____| |____ _| |_ ",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "|_____/ \\____/   \\_____|______|_____|",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "                                     ",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
         Line::from(vec![Span::styled(
             "                                     ",
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )]),
     ];
@@ -85,7 +85,7 @@ pub fn render(frame: &mut Frame, app: &App) {
     let title = Paragraph::new(title_text)
         .style(
             Style::default()
-                .fg(Color::Rgb(0, 255, 255))
+                .fg(Color::Rgb(0, 255, 0))
                 .add_modifier(Modifier::BOLD),
         )
         .alignment(ratatui::layout::Alignment::Center);
