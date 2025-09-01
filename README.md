@@ -2,7 +2,7 @@
   <img src="logo.png" alt="dj-cli logo" width="400"/>
 </p>
 
-<h1 align="center">🎵 DJ-CLI</h1>
+<h1 align="center">DJ-CLI</h1>
 <h2 align="center">Professional Terminal Interface for YouTube MP3 Downloads</h2>
 
 <p align="center">
@@ -25,39 +25,39 @@
 
 ---
 
-## 📸 Interface Preview
+## Interface Preview
 
 <p align="center">
-  <img src="dj-screenshot.png" alt="DJ-CLI Terminal Interface" width="800"/>
+  <img src="interface.png" alt="DJ-CLI terminal interface" width="800"/>
 </p>
 
-*DJ-CLI's beautiful terminal interface featuring real-time status updates and intuitive keyboard controls.*
+Example of the terminal interface displaying status information and keyboard controls.
 
 ---
 
-## ✨ Features
+## Features
 
-### 🚀 **Core Functionality**
-- **Lightning-fast downloads** using the battle-tested [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) backend
-- **High-quality audio extraction** with support for 128kbps and 256kbps MP3 output
-- **Smart URL extraction** from messy clipboard text - paste anything, get clean URLs
-- **Async operations** - non-blocking downloads with real-time progress updates
+### Core Functionality
+- **Efficient downloads** using the [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) backend
+- **High-quality audio extraction** supporting 128kbps and 256kbps MP3 output
+- **URL extraction** from clipboard text
+- **Asynchronous operations** with real-time progress updates
 
-### 🎨 **Terminal User Interface**
-- **Beautiful TUI** powered by [`ratatui`](https://ratatui.rs) with vibrant colors
-- **Responsive design** that adapts to different terminal sizes
+### Terminal User Interface
+- **Terminal interface** powered by [`ratatui`](https://ratatui.rs)
+- **Responsive layout** that adapts to terminal size
 - **Real-time status updates** with download progress and error handling
-- **Keyboard-driven navigation** with intuitive controls
-- **Focus management** for seamless user experience
+- **Keyboard navigation** with intuitive controls
+- **Focus management** for consistent user experience
 
-### 🛡️ **Reliability & Performance**
+### Reliability & Performance
 - **Robust error handling** - graceful failures that don't crash the interface
 - **Input sanitization** - automatically cleans and validates pasted content
 - **Memory-safe operations** with input length limits and cleanup
 - **Cross-platform support**: macOS, Linux, Windows (via WSL)
 - **Zero external dependencies** beyond yt-dlp and ffmpeg
 
-### 📁 **File Management**
+### File Management
 - **Automatic organization** - downloads save directly to your Downloads folder
 - **Metadata embedding** - includes thumbnails and track information
 - **Filename sanitization** - handles special characters and long titles
@@ -65,7 +65,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation Options
 
@@ -100,7 +100,7 @@ dj-cli "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 ---
 
-## 🛠️ Prerequisites & Dependencies
+## Prerequisites & Dependencies
 
 ### Required Software
 
@@ -156,9 +156,9 @@ cargo --version
 
 ---
 
-## 📖 Comprehensive Usage Guide
+## Comprehensive Usage Guide
 
-### 🎯 Single Download Mode
+### Single Download Mode
 
 1. **Launch DJ-CLI**
    ```bash
@@ -174,7 +174,7 @@ cargo --version
    - **Ctrl+1** for quick 128kbps download
    - **Ctrl+2** for quick 256kbps download
 
-### 🎯 Advanced Features
+### Advanced Features
 
 #### Smart Input Handling
 - **Paste any text** containing YouTube URLs - DJ-CLI extracts them automatically
@@ -196,7 +196,7 @@ cargo --version
 
 ---
 
-## 🔧 Configuration & Customization
+## Configuration & Customization
 
 ### Output Directory
 Files are automatically saved to your system's Downloads folder:
@@ -219,7 +219,7 @@ Downloaded files use the format: `[Video Title].mp3`
 
 ---
 
-## 🏗️ Architecture & Technical Details
+## Architecture & Technical Details
 
 ### Built With Modern Rust
 - **[Tokio](https://tokio.rs)** - Async runtime for non-blocking operations
@@ -243,7 +243,7 @@ Downloaded files use the format: `[Video Title].mp3`
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -288,7 +288,7 @@ RUST_LOG=debug cargo run
 
 ---
 
-## 🔄 Updates & Maintenance
+## Updates & Maintenance
 
 ### Staying Current
 ```bash
@@ -310,9 +310,9 @@ cargo update
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions! Here's how to get involved:
+Contributions are welcome. To get started:
 
 ### Development Setup
 ```bash
@@ -348,16 +348,16 @@ cargo test
 7. **Open** a Pull Request with detailed description
 
 ### Areas for Contribution
-- 🎨 UI/UX improvements
-- 🚀 Performance optimizations
-- 🔧 Additional audio formats (FLAC, AAC)
-- 📱 Configuration file support
-- 🌐 Internationalization
-- 📝 Documentation improvements
+- UI/UX improvements
+- Performance optimizations
+- Additional audio formats (FLAC, AAC)
+- Configuration file support
+- Internationalization
+- Documentation improvements
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for complete details.
 
@@ -372,7 +372,7 @@ of this software and associated documentation files...
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **[yt-dlp team](https://github.com/yt-dlp/yt-dlp)** - Powerful YouTube download engine
 - **[Ratatui community](https://ratatui.rs)** - Excellent terminal UI framework
@@ -381,9 +381,9 @@ of this software and associated documentation files...
 
 ---
 
-## 📊 Project Stats
+## Project Stats
 
-- **Language**: Rust 🦀
+- **Language**: Rust 
 - **Lines of Code**: ~850+
 - **Dependencies**: 16 (carefully chosen)
 - **Binary Size**: ~2MB (optimized)
@@ -392,6 +392,6 @@ of this software and associated documentation files...
 ---
 
 <p align="center">
-  <strong>Built with ❤️ using Rust</strong><br>
-  <i>Making YouTube audio downloads fast, safe, and beautiful</i>
+  <strong>Built with Rust</strong><br>
+  <i>Terminal-based YouTube audio downloads</i>
 </p>
