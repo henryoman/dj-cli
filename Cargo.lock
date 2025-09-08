@@ -1832,9 +1832,9 @@ dependencies = [
 
 [[package]]
 name = "rat-focus"
-version = "1.0.2"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b4866c2abcc7b8c8744548b4849c67b654d2dd28ee118fcc9b65979c96247cb"
+checksum = "b9db334c94bea906929f5a45f0937b550f38e1f9e500de348cded35cecbeb794"
 dependencies = [
  "crossterm 0.28.1",
  "fxhash",
@@ -1846,9 +1846,9 @@ dependencies = [
 
 [[package]]
 name = "rat-reloc"
-version = "1.1.2"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbddcf2d92aae0efb227180c07d8fbbb4480cd30318e4e6f5825aae8f6dc5ba5"
+checksum = "1b14e2f9d0675f80c303e40c1975d7df52f94c59f9fa9e6f33ecdcb38784695b"
 dependencies = [
  "log",
  "ratatui",
@@ -1869,14 +1869,15 @@ dependencies = [
 
 [[package]]
 name = "rat-text"
-version = "1.0.5"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95641a2429aeb420a2c37d7a8c0395cf28ce4ac4f32d914813196ca22a7a3004"
+checksum = "69f2dcd688f0ba02531527c07ea75850f96d551e67530d6ba4ca1f42acaaaf14"
 dependencies = [
  "chrono",
  "crossterm 0.28.1",
  "dyn-clone",
  "format_num_pattern",
+ "fxhash",
  "iset",
  "log",
  "pure-rust-locales",
