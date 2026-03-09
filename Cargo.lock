@@ -1821,9 +1821,9 @@ checksum = "37427a103efff37496fad20528e767ba658737e731dff1cf9231104859455dc0"
 
 [[package]]
 name = "rat-event"
-version = "1.2.3"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26e333b72bcd23f28ac85ba6441c5e75600ace55947e71930e7cb327e6716286"
+checksum = "8527a6352d150a8767e6422edbdbe5c74919913d41acd2c17bc5571e1aa09a7b"
 dependencies = [
  "crossterm 0.28.1",
  "log",
@@ -1832,11 +1832,12 @@ dependencies = [
 
 [[package]]
 name = "rat-focus"
-version = "1.0.2"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b4866c2abcc7b8c8744548b4849c67b654d2dd28ee118fcc9b65979c96247cb"
+checksum = "9778c58871fb145c6682633f432fcd4ec302f06fd41765dbd86b823e6cc6eaf4"
 dependencies = [
  "crossterm 0.28.1",
+ "dyn-clone",
  "fxhash",
  "log",
  "rat-event",
@@ -1846,19 +1847,18 @@ dependencies = [
 
 [[package]]
 name = "rat-reloc"
-version = "1.1.2"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbddcf2d92aae0efb227180c07d8fbbb4480cd30318e4e6f5825aae8f6dc5ba5"
+checksum = "bcd0715b910956d845c342cc570b17685a154768b2d05b555cd95fbc137138d5"
 dependencies = [
- "log",
  "ratatui",
 ]
 
 [[package]]
 name = "rat-scrolled"
-version = "1.1.2"
+version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bef575500e9a54d649a470abf1ec136929845bfced1badb5fda4994c6ce39f9"
+checksum = "72abe5d23aef5d1d53a92e3c5c4a2477063080c1d7f67308d1c9fa33c78a626d"
 dependencies = [
  "crossterm 0.28.1",
  "log",
@@ -1869,9 +1869,9 @@ dependencies = [
 
 [[package]]
 name = "rat-text"
-version = "1.0.5"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95641a2429aeb420a2c37d7a8c0395cf28ce4ac4f32d914813196ca22a7a3004"
+checksum = "0e0c3c1b4129f710dd2d69c7457c42ef814c1419dfa88b9b49348f59f20b3569"
 dependencies = [
  "chrono",
  "crossterm 0.28.1",
@@ -1886,7 +1886,9 @@ dependencies = [
  "rat-reloc",
  "rat-scrolled",
  "ratatui",
+ "regex-cursor",
  "ropey",
+ "rustc-hash",
  "unicode-display-width",
  "unicode-segmentation",
 ]
@@ -1956,6 +1958,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "regex-cursor"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0497c781d2f982ae8284d2932aee6a877e58a4541daa5e8fadc18cc75c23a61d"
+dependencies = [
+ "log",
+ "memchr",
+ "regex-automata",
+ "regex-syntax",
+ "ropey",
+]
+
+[[package]]
 name = "regex-syntax"
 version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1976,6 +1991,12 @@ name = "rustc-demangle"
 version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56f7d92ca342cea22a06f2121d944b4fd82af56988c270852495420f961d4ace"
+
+[[package]]
+name = "rustc-hash"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
 
 [[package]]
 name = "rustix"
